@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Recipe Master - Interactive English Quest</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF6B35',
+                            yellow: '#F7C59F',
+                            cream: '#EFEFD0',
+                            teal: '#004E64',
+                            green: '#25A18E',
+                            purple: '#7209B7'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #FFFAF0 0%, #E8F5E9 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        .bounce-hover:hover {
+            transform: translateY(-4px) scale(1.02);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 2s infinite;
+        }
+
+        /* Custom Scrollbar for smooth touch interaction */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #25A18E;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen justify-between p-3 md:p-6">
+
+    <!-- Top Navigation & Score Bar -->
+    <header class="max-w-4xl mx-auto w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 mb-4 border-2 border-amber-200 card-shadow">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-white p-2.5 rounded-xl shadow-inner text-xl">
+                    🍳
+                </div>
+                <div>
+                    <h1 class="font-game text-xl md:text-2xl font-bold text-amber-700 leading-none">Food & Recipe Quest</h1>
+                    <p class="text-xs text-slate-500 font-medium">English Interactive Learning</p>
+                </div>
+            </div>
+
+            <!-- Score & Progress Stats -->
+            <div class="flex items-center gap-4 ml-auto">
+                <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+                    <i class="fa-solid me-1 fa-star text-amber-400 text-lg animate-bounce"></i>
+                    <span id="scoreDisplay" class="font-game text-xl font-bold text-amber-600">0</span>
+                    <span class="text-xs text-slate-400 font-semibold">pts</span>
+                </div>
+
+                <button id="soundToggle" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition" title="Toggle Sound">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Progress Bar -->
+        <div class="mt-3 w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
+            <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-full w-0 transition-all duration-500 rounded-full"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Stage Area -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex items-center justify-center">
+
+        <!-- SCREEN 0: WELCOME & STUDENT INTRO -->
+        <section id="welcomeScreen" class="w-full bg-white rounded-3xl p-6 md:p-10 card-shadow border-4 border-amber-300 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-100 rounded-full blur-xl opacity-70"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-100 rounded-full blur-xl opacity-70"></div>
+
+            <span class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3 uppercase tracking-wider">
+                🌟 Let's Learn English!
+            </span>
+            <h2 class="font-game text-3xl md:text-5xl font-bold text-slate-800 mb-4">
+                My Favorite Food <span class="text-amber-500">&</span> Cooking Recipe
+            </h2>
+            <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto mb-6">
+                Pelajari cara menanyakan makanan favorit, mengenali bahan & alat dapur, serta menyusun teks prosedur resep memasak dengan menyenangkan!
+            </p>
+
+            <!-- Student Name Input -->
+            <div class="max-w-md mx-auto mb-8">
+                <label for="studentName" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Masukkan Nama Siswa / Kelompok:</label>
+                <div class="relative">
+                    <i class="fa-solid fa-user text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="studentName" placeholder="Contoh: Budi / Kelompok 1" class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:outline-none font-semibold text-slate-700 text-center">
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="font-game text-lg md:text-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-4 px-10 rounded-2xl shadow-lg bounce-hover transition-all inline-flex items-center gap-3 glow-effect">
+                <i class="fa-solid fa-play"></i> Mulai Petualangan!
+            </button>
+        </section>
+
+        <!-- SCREEN 1: LEVEL 1 - VOCABULARY QUIZ -->
+        <section id="level1Screen" class="hidden w-full bg-white rounded-3xl p-6 md:p-8 card-shadow border-4 border-emerald-300">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <div>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Level 1</span>
+                    <h2 class="font-game text-2xl font-bold text-emerald-700 mt-1">Food, Tastes & Kitchen Utensils</h2>
+                </div>
+                <div class="text-right">
+                    <span id="l1QuestionNum" class="font-game text-lg font-bold text-slate-700">Soal 1/5</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="l1QuestionBox" class="text-center py-4">
+                <div id="l1Emoji" class="text-7xl mb-3 animate-pulse-slow">🍕</div>
+                <h3 id="l1Prompt" class="text-xl md:text-2xl font-bold text-slate-800 mb-2">What taste is this?</h3>
+                <p id="l1SubPrompt" class="text-sm text-slate-500 mb-6">Pilih kosakata Bahasa Inggris yang paling tepat!</p>
+
+                <!-- Options Grid -->
+                <div id="l1Options" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-xl mx-auto">
+                    <!-- Dynamic Buttons Generated by JS -->
+                </div>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="l1Feedback" class="hidden mt-6 p-4 rounded-xl text-center font-bold text-sm"></div>
+        </section>
+
+        <!-- SCREEN 2: LEVEL 2 - SENTENCE BUILDER -->
+        <section id="level2Screen" class="hidden w-full bg-white rounded-3xl p-6 md:p-8 card-shadow border-4 border-sky-300">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <div>
+                    <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Level 2</span>
+                    <h2 class="font-game text-2xl font-bold text-sky-700 mt-1">Asking & Giving Info (Sentence Builder)</h2>
+                </div>
+                <div class="text-right">
+                    <span id="l2QuestionNum" class="font-game text-lg font-bold text-slate-700">Kalimat 1/4</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <p class="text-sm text-slate-500 font-medium">Susun kata-kata acak berikut menjadi kalimat Bahasa Inggris yang tepat!</p>
+                <div id="l2TargetHint" class="mt-2 text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg inline-block font-semibold">
+                    💡 Arti: Makanan favorit saya adalah nasi goreng.
+                </div>
+            </div>
+
+            <!-- Constructed Sentence Box -->
+            <div id="constructedSentence" class="min-h-[70px] bg-sky-50/70 border-2 border-dashed border-sky-300 rounded-2xl p-3 flex flex-wrap items-center justify-center gap-2 mb-6 shadow-inner">
+                <span class="text-slate-400 text-sm italic italic-placeholder">Klik kata di bawah untuk menyusun kalimat...</span>
+            </div>
+
+            <!-- Word Bank Pool -->
+            <div id="wordBank" class="flex flex-wrap items-center justify-center gap-2.5 max-w-2xl mx-auto mb-8 min-h-[60px]">
+                <!-- Dynamic Word Chips -->
+            </div>
+
+            <div class="flex justify-center gap-3">
+                <button onclick="resetSentence()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-3 rounded-xl transition">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+                <button onclick="checkSentence()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-8 py-3 rounded-xl shadow-md bounce-hover transition">
+                    <i class="fa-solid fa-check"></i> Periksa Kalimat
+                </button>
+            </div>
+
+            <div id="l2Feedback" class="hidden mt-6 p-4 rounded-xl text-center font-bold text-sm"></div>
+        </section>
+
+        <!-- SCREEN 3: LEVEL 3 - RECIPE RE-ORDER -->
+        <section id="level3Screen" class="hidden w-full bg-white rounded-3xl p-6 md:p-8 card-shadow border-4 border-purple-300">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <div>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Level 3</span>
+                    <h2 class="font-game text-2xl font-bold text-purple-700 mt-1">Procedure Text: Recipe Sequence</h2>
+                </div>
+                <div class="text-right">
+                    <span id="l3DishTitle" class="font-game text-sm font-bold text-slate-600">Recipe: Fried Rice 🍳</span>
+                </div>
+            </div>
+
+            <p class="text-sm text-slate-500 text-center mb-4">Urutkan langkah-langkah memasak berikut menggunakan tombol <i class="fa-solid fa-arrow-up text-purple-600"></i> dan <i class="fa-solid fa-arrow-down text-purple-600"></i> agar menjadi urutan teks resep yang benar!</p>
+
+            <!-- Re-order List Container -->
+            <div id="recipeList" class="space-y-2.5 max-w-2xl mx-auto mb-6">
+                <!-- Dynamic Steps Items -->
+            </div>
+
+            <div class="text-center">
+                <button onclick="checkRecipeOrder()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-md bounce-hover transition">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Periksa Urutan Resep
+                </button>
+            </div>
+
+            <div id="l3Feedback" class="hidden mt-4 p-4 rounded-xl text-center font-bold text-sm"></div>
+        </section>
+
+        <!-- SCREEN 4: FINAL RECAP & CERTIFICATE -->
+        <section id="finalScreen" class="hidden w-full bg-white rounded-3xl p-6 md:p-10 card-shadow border-4 border-amber-400 text-center relative overflow-hidden">
+            <div class="text-6xl mb-3 animate-bounce">🏆</div>
+            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">Quest Completed!</span>
+
+            <h2 class="font-game text-3xl md:text-4xl font-bold text-slate-800 mt-2 mb-1">
+                Selamat, <span id="certName" class="text-amber-600">Siswa Great!</span>
+            </h2>
+            <p class="text-slate-500 text-sm mb-6">Kamu telah berhasil menyelesaikan semua modul tantangan!</p>
+
+            <!-- Score Box -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 max-w-md mx-auto mb-6 shadow-sm">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Skor Kamu</div>
+                <div id="finalScore" class="font-game text-5xl font-extrabold text-amber-500 mb-3">100</div>
+
+                <!-- Stars Rating -->
+                <div id="starContainer" class="flex justify-center gap-2 text-2xl text-amber-400 mb-4">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+
+                <div id="badgeText" class="font-bold text-slate-700 text-sm bg-white py-2 px-4 rounded-xl shadow-sm border border-amber-100 inline-block">
+                    🏅 Master Chef English Award
+                </div>
+            </div>
+
+            <!-- Breakdown Summary -->
+            <div class="grid grid-cols-3 gap-2 max-w-md mx-auto text-left mb-8 text-xs font-medium text-slate-600">
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
+                    <div class="font-bold text-emerald-600">Level 1</div>
+                    <div id="l1ScoreRecap">100%</div>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
+                    <div class="font-bold text-sky-600">Level 2</div>
+                    <div id="l2ScoreRecap">100%</div>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
+                    <div class="font-bold text-purple-600">Level 3</div>
+                    <div id="l3ScoreRecap">100%</div>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="font-game text-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-8 rounded-2xl shadow-lg bounce-hover transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Main Lagi / Coba Lagi
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center mt-6 text-xs text-slate-400">
+        <p>© Media Pembelajaran Bahasa Inggris Interaktif - Teks Prosedur & Makanan Favorit</p>
+    </footer>
+
+    <script>
+        /* Web Audio API Sound Effects Engine (Zero External Audio Files) */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+
+            if (type === 'correct') {
+                // Happy high note chime
+                const now = audioCtx.currentTime;
+                const osc1 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, now); // C5
+                osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc1.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc1.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                osc1.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.5);
+            } else if (type === 'wrong') {
+                // Soft buzz note
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(140, now + 0.15);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'click') {
+                // Subtle tap sound
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'victory') {
+                // Fanfare sound
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.12);
+
+                    gain.gain.setValueAtTime(0.3, now + index * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.12 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + index * 0.12);
+                    osc.stop(now + index * 0.12 + 0.3);
+                });
+            }
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-slate-600';
+                playSound('click');
+            }
+        }
+
+        // APP STATE
+        let player = {
+            name: "Siswa",
+            score: 0,
+            currentLevel: 0
+        };
+
+        // LEVEL 1 DATA: Vocabulary & Taste
+        const l1Data = [
+            {
+                emoji: "🌶️",
+                prompt: "What taste is chili pepper?",
+                sub: "Bagaimana rasa cabai?",
+                options: ["Sweet", "Spicy", "Sour", "Salty"],
+                correct: 1
+            },
+            {
+                emoji: "🍩",
+                prompt: "What taste is a donut?",
+                sub: "Bagaimana rasa donat?",
+                options: ["Spicy", "Bitter", "Sweet", "Salty"],
+                correct: 2
+            },
+            {
+                emoji: "🍳",
+                prompt: "Which utensil is used for frying?",
+                sub: "Alat apa yang digunakan untuk menggoreng?",
+                options: ["Frying Pan", "Spoon", "Blender", "Glass"],
+                correct: 0
+            },
+            {
+                emoji: "🧂",
+                prompt: "What taste is table salt?",
+                sub: "Bagaimana rasa garam meja?",
+                options: ["Sweet", "Sour", "Salty", "Spicy"],
+                correct: 2
+            },
+            {
+                emoji: "🔪",
+                prompt: "What tool do we use to CHOP ingredients?",
+                sub: "Alat apa yang dipakai untuk memotong bahan?",
+                options: ["Fork", "Knife", "Plate", "Pot"],
+                correct: 1
+            }
+        ];
+        let l1Index = 0;
+        let l1ScoreCount = 0;
+
+        // LEVEL 2 DATA: Sentence Builder
+        const l2Data = [
+            {
+                hint: "Arti: Apakah makanan favoritmu?",
+                words: ["What", "is", "your", "favorite", "food", "?"],
+                correctOrder: ["What", "is", "your", "favorite", "food", "?"]
+            },
+            {
+                hint: "Arti: Makanan favorit saya adalah nasi goreng.",
+                words: ["My", "favorite", "food", "is", "fried", "rice", "."],
+                correctOrder: ["My", "favorite", "food", "is", "fried", "rice", "."]
+            },
+            {
+                hint: "Arti: Bagaimana rasanya?",
+                words: ["How", "does", "it", "taste", "?"],
+                correctOrder: ["How", "does", "it", "taste", "?"]
+            },
+            {
+                hint: "Arti: Rasanya gurih dan lezat.",
+                words: ["It", "tastes", "savory", "and", "delicious", "."],
+                correctOrder: ["It", "tastes", "savory", "and", "delicious", "."]
+            }
+        ];
+        let l2Index = 0;
+        let l2CurrentSentence = [];
+        let l2ScoreCount = 0;
+
+        // LEVEL 3 DATA: Procedure Text Re-order
+        const l3Recipe = {
+            title: "Recipe: How to Make Banana Pancakes 🥞",
+            steps: [
+                { id: 1, text: "First, mash the ripe bananas in a bowl using a fork.", order: 1 },
+                { id: 2, text: "Next, add eggs and flour into the bowl and mix well.", order: 2 },
+                { id: 3, text: "Then, heat a pan with a little butter over medium heat.", order: 3 },
+                { id: 4, text: "After that, pour a spoonful of batter and cook until golden brown.", order: 4 },
+                { id: 5, text: "Finally, serve the pancakes with honey on top.", order: 5 }
+            ]
+        };
+        let l3CurrentOrder = [];
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('scoreDisplay').innerText = player.score;
+        }
+
+        function showScreen(screenId) {
+            const screens = ['welcomeScreen', 'level1Screen', 'level2Screen', 'level3Screen', 'finalScreen'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function startGame() {
+            playSound('click');
+            const nameInput = document.getElementById('studentName').value.trim();
+            player.name = nameInput !== "" ? nameInput : "Koki Cilik";
+            player.score = 0;
+            l1Index = 0;
+            l1ScoreCount = 0;
+            updateScoreDisplay();
+            updateProgress(10);
+            showScreen('level1Screen');
+            loadL1Question();
+        }
+
+        function loadL1Question() {
+            const q = l1Data[l1Index];
+            document.getElementById('l1QuestionNum').innerText = `Soal ${l1Index + 1}/${l1Data.length}`;
+            document.getElementById('l1Emoji').innerText = q.emoji;
+            document.getElementById('l1Prompt').innerText = q.prompt;
+            document.getElementById('l1SubPrompt').innerText = q.sub;
+
+            const feedback = document.getElementById('l1Feedback');
+            feedback.className = "hidden mt-6 p-4 rounded-xl text-center font-bold text-sm";
+
+            const optContainer = document.getElementById('l1Options');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full py-3.5 px-4 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 font-bold text-base transition duration-150 text-left flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => checkL1Answer(idx, btn);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkL1Answer(selectedIndex, btnElement) {
+            const q = l1Data[l1Index];
+            const feedback = document.getElementById('l1Feedback');
+            const buttons = document.querySelectorAll('#l1Options button');
+
+            // Disable all buttons to prevent double click
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedIndex === q.correct) {
+                playSound('correct');
+                btnElement.className = "w-full py-3.5 px-4 rounded-xl border-2 border-emerald-500 bg-emerald-500 text-white font-bold text-base transition flex items-center justify-between";
+                btnElement.innerHTML = `<span>${q.options[selectedIndex]}</span> <i class="fa-solid fa-circle-check"></i>`;
+                
+                feedback.innerText = "✨ Tepat sekali! Jawaban kamu benar (+20 pts)";
+                feedback.className = "mt-6 p-4 rounded-xl text-center font-bold text-sm bg-emerald-100 text-emerald-800 border border-emerald-300";
+                
+                player.score += 20;
+                l1ScoreCount += 20;
+                updateScoreDisplay();
+            } else {
+                playSound('wrong');
+                btnElement.className = "w-full py-3.5 px-4 rounded-xl border-2 border-red-500 bg-red-500 text-white font-bold text-base transition flex items-center justify-between";
+                btnElement.innerHTML = `<span>${q.options[selectedIndex]}</span> <i class="fa-solid fa-circle-xmark"></i>`;
+
+                // Highlight correct one
+                buttons[q.correct].className = "w-full py-3.5 px-4 rounded-xl border-2 border-emerald-500 bg-emerald-100 text-emerald-800 font-bold text-base flex items-center justify-between";
+
+                feedback.innerText = `💡 Kurang tepat. Jawaban yang benar adalah: ${q.options[q.correct]}`;
+                feedback.className = "mt-6 p-4 rounded-xl text-center font-bold text-sm bg-red-100 text-red-800 border border-red-300";
+            }
+            feedback.classList.remove('hidden');
+
+            setTimeout(() => {
+                l1Index++;
+                if (l1Index < l1Data.length) {
+                    updateProgress(10 + (l1Index / l1Data.length) * 25);
+                    loadL1Question();
+                } else {
+                    // Transition to Level 2
+                    updateProgress(35);
+                    initLevel2();
+                }
+            }, 1600);
+        }
+
+        function initLevel2() {
+            l2Index = 0;
+            l2ScoreCount = 0;
+            showScreen('level2Screen');
+            loadL2Question();
+        }
+
+        function loadL2Question() {
+            const item = l2Data[l2Index];
+            document.getElementById('l2QuestionNum').innerText = `Kalimat ${l2Index + 1}/${l2Data.length}`;
+            document.getElementById('l2TargetHint').innerText = `💡 ${item.hint}`;
+            
+            l2CurrentSentence = [];
+            renderConstructedSentence();
+
+            const feedback = document.getElementById('l2Feedback');
+            feedback.className = "hidden mt-6 p-4 rounded-xl text-center font-bold text-sm";
+
+            // Shuffle word bank for fun
+            const shuffledWords = [...item.words].sort(() => Math.random() - 0.5);
+            renderWordBank(shuffledWords);
+        }
+
+        function renderWordBank(words) {
+            const bank = document.getElementById('wordBank');
+            bank.innerHTML = '';
+            words.forEach((word) => {
+                const chip = document.createElement('button');
+                chip.className = "bg-white border-2 border-sky-300 hover:border-sky-500 text-sky-800 font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow transition bounce-hover text-sm md:text-base";
+                chip.innerText = word;
+                chip.onclick = () => {
+                    playSound('click');
+                    l2CurrentSentence.push(word);
+                    chip.style.display = 'none'; // hide chip from pool
+                    renderConstructedSentence();
+                };
+                bank.appendChild(chip);
+            });
+        }
+
+        function renderConstructedSentence() {
+            const container = document.getElementById('constructedSentence');
+            if (l2CurrentSentence.length === 0) {
+                container.innerHTML = '<span class="text-slate-400 text-sm italic">Klik kata di bawah untuk menyusun kalimat...</span>';
+                return;
+            }
+
+            container.innerHTML = '';
+            l2CurrentSentence.forEach((word, index) => {
+                const chip = document.createElement('button');
+                chip.className = "bg-sky-500 text-white font-bold px-3.5 py-1.5 rounded-lg text-sm md:text-base shadow flex items-center gap-1.5 transition hover:bg-sky-600";
+                chip.innerHTML = `${word} <i class="fa-solid fa-xmark text-xs opacity-70"></i>`;
+                chip.onclick = () => {
+                    playSound('click');
+                    // Remove word from constructed sentence
+                    l2CurrentSentence.splice(index, 1);
+                    renderConstructedSentence();
+
+                    // Unhide word in wordbank
+                    const bankChips = document.querySelectorAll('#wordBank button');
+                    bankChips.forEach(b => {
+                        if (b.innerText === word && b.style.display === 'none') {
+                            b.style.display = 'inline-block';
+                        }
+                    });
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        function resetSentence() {
+            playSound('click');
+            l2CurrentSentence = [];
+            renderConstructedSentence();
+            const bankChips = document.querySelectorAll('#wordBank button');
+            bankChips.forEach(b => b.style.display = 'inline-block');
+        }
+
+        function checkSentence() {
+            const item = l2Data[l2Index];
+            const feedback = document.getElementById('l2Feedback');
+
+            if (l2CurrentSentence.length === 0) return;
+
+            const isCorrect = JSON.stringify(l2CurrentSentence) === JSON.stringify(item.correctOrder);
+
+            if (isCorrect) {
+                playSound('correct');
+                feedback.innerText = "🎉 Luar biasa! Susunan kalimat kamu sangat tepat! (+25 pts)";
+                feedback.className = "mt-6 p-4 rounded-xl text-center font-bold text-sm bg-emerald-100 text-emerald-800 border border-emerald-300";
+                player.score += 25;
+                l2ScoreCount += 25;
+                updateScoreDisplay();
+
+                setTimeout(() => {
+                    l2Index++;
+                    if (l2Index < l2Data.length) {
+                        updateProgress(35 + (l2Index / l2Data.length) * 30);
+                        loadL2Question();
+                    } else {
+                        updateProgress(65);
+                        initLevel3();
+                    }
+                }, 1500);
+            } else {
+                playSound('wrong');
+                feedback.innerText = "❌ Masih ada urutan yang keliru. Coba atur kembali kata-katanya!";
+                feedback.className = "mt-6 p-4 rounded-xl text-center font-bold text-sm bg-red-100 text-red-800 border border-red-300";
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        function initLevel3() {
+            showScreen('level3Screen');
+            document.getElementById('l3DishTitle').innerText = l3Recipe.title;
+
+            // Randomize order initially
+            l3CurrentOrder = [...l3Recipe.steps].sort(() => Math.random() - 0.5);
+            renderRecipeList();
+        }
+
+        function renderRecipeList() {
+            const container = document.getElementById('recipeList');
+            container.innerHTML = '';
+
+            l3CurrentOrder.forEach((step, idx) => {
+                const item = document.createElement('div');
+                item.className = "bg-white border-2 border-purple-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-sm hover:border-purple-400 transition";
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-game font-bold flex items-center justify-center text-sm">
+                            ${idx + 1}
+                        </span>
+                        <span class="text-xs md:text-sm text-slate-700 font-semibold leading-relaxed">
+                            ${step.text}
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <button onclick="moveStep(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 p-1 bg-slate-100 text-slate-400 rounded-lg"' : 'class="p-1 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg text-xs transition"'}>
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <button onclick="moveStep(${idx}, 1)" ${idx === l3CurrentOrder.length - 1 ? 'disabled class="opacity-30 p-1 bg-slate-100 text-slate-400 rounded-lg"' : 'class="p-1 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg text-xs transition"'}>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function moveStep(index, direction) {
+            playSound('click');
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= l3CurrentOrder.length) return;
+
+            // Swap
+            const temp = l3CurrentOrder[index];
+            l3CurrentOrder[index] = l3CurrentOrder[targetIndex];
+            l3CurrentOrder[targetIndex] = temp;
+
+            renderRecipeList();
+        }
+
+        function checkRecipeOrder() {
+            const feedback = document.getElementById('l3Feedback');
+            let isPerfect = true;
+
+            for (let i = 0; i < l3CurrentOrder.length; i++) {
+                if (l3CurrentOrder[i].order !== i + 1) {
+                    isPerfect = false;
+                    break;
+                }
+            }
+
+            if (isPerfect) {
+                playSound('victory');
+                feedback.innerText = "🌟 SEMPURNA! Seluruh urutan resep memasak sudah benar! (+100 pts)";
+                feedback.className = "mt-4 p-4 rounded-xl text-center font-bold text-sm bg-emerald-100 text-emerald-800 border border-emerald-300";
+                
+                player.score += 100;
+                updateScoreDisplay();
+                updateProgress(100);
+
+                setTimeout(() => {
+                    showFinalScreen();
+                }, 1800);
+            } else {
+                playSound('wrong');
+                feedback.innerText = "⚠️ Urutan resep belum sesuai. Perhatikan kata hubung (First, Next, Then, Finally)!";
+                feedback.className = "mt-4 p-4 rounded-xl text-center font-bold text-sm bg-red-100 text-red-800 border border-red-300";
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        function showFinalScreen() {
+            showScreen('finalScreen');
+            document.getElementById('certName').innerText = player.name;
+            document.getElementById('finalScore').innerText = player.score;
+
+            // Recap details
+            document.getElementById('l1ScoreRecap').innerText = `${l1ScoreCount}/100`;
+            document.getElementById('l2ScoreRecap').innerText = `${l2ScoreCount}/100`;
+            document.getElementById('l3ScoreRecap').innerText = `100/100`;
+
+            const starContainer = document.getElementById('starContainer');
+            const badgeText = document.getElementById('badgeText');
+
+            if (player.score >= 250) {
+                starContainer.innerHTML = `
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                `;
+                badgeText.innerText = "🏆 Master Chef English Wizard";
+            } else if (player.score >= 180) {
+                starContainer.innerHTML = `
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <i class="fa-regular fa-star text-amber-300"></i>
+                `;
+                badgeText.innerText = "🍳 Junior Recipe Expert";
+            } else {
+                starContainer.innerHTML = `
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <i class="fa-regular fa-star text-amber-300"></i>
+                    <i class="fa-regular fa-star text-amber-300"></i>
+                `;
+                badgeText.innerText = "👨‍🍳 Cooking Learner";
+            }
+        }
+
+        function restartGame() {
+            playSound('click');
+            showScreen('welcomeScreen');
+            updateProgress(0);
+        }
+    </script>
+</body>
+</html>
